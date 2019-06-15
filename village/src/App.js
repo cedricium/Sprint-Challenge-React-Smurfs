@@ -1,5 +1,10 @@
 import React, { Component } from 'react';
 import axios from 'axios'
+import {
+  Route,
+  NavLink,
+  withRouter
+} from 'react-router-dom'
 
 import './App.css';
 import SmurfForm from './components/SmurfForm';
@@ -38,7 +43,8 @@ class App extends Component {
         const smurfs = (await axios.post('http://localhost:3333/smurfs', {
           ...smurf
         })).data
-        this.setState({ smurfs, error: '' })
+        await this.setState({ smurfs, error: '' })
+        this.props.history.push('/')
       } catch (error) {
         this.setState({ error: error.toString() })
       }
@@ -52,12 +58,22 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <SmurfForm handleSubmit={this.addSmurf} />
+        <nav className="navbar">
+          <div className="nav-items">
+            <NavLink exact className="nav-item" to="/">
+              Smurfs
+            </NavLink>
+            <NavLink className="nav-item" to="/smurf-form">
+              Smurf Form
+            </NavLink>
+          </div>
+        </nav>
         {this.state.error && <p>{this.state.error}</p>}
-        <Smurfs smurfs={this.state.smurfs} />
+        <Route exact path="/" render={props => <Smurfs {...props} smurfs={this.state.smurfs} />} />
+        <Route path="/smurf-form" render={props => <SmurfForm {...props} handleSubmit={this.addSmurf} />} />
       </div>
     );
   }
 }
 
-export default App;
+export default withRouter(App);
