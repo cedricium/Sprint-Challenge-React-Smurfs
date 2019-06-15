@@ -24,16 +24,35 @@ class App extends Component {
   getSmurfs = async () => {
     try {
       const smurfs = (await axios.get('http://localhost:3333/smurfs')).data
-      this.setState({ smurfs })
+      this.setState({ smurfs, error: '' })
     } catch (error) {
       this.setState({ error: error.toString() })
+    }
+  }
+
+  addSmurf = async (e, smurf) => {
+    e.preventDefault()
+    const containsEmptyValues = Object.values(smurf).some(value => value === '')
+    if (!containsEmptyValues) {
+      try {
+        const smurfs = (await axios.post('http://localhost:3333/smurfs', {
+          ...smurf
+        })).data
+        this.setState({ smurfs, error: '' })
+      } catch (error) {
+        this.setState({ error: error.toString() })
+      }
+    } else {
+      this.setState({
+        error: 'Error: smurf form data is missing some or all data!'
+      })
     }
   }
 
   render() {
     return (
       <div className="App">
-        <SmurfForm />
+        <SmurfForm handleSubmit={this.addSmurf} />
         {this.state.error && <p>{this.state.error}</p>}
         <Smurfs smurfs={this.state.smurfs} />
       </div>
